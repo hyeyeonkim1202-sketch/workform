@@ -41,26 +41,10 @@ export default function DashboardPage() {
   }, []);
 
   const sourceLabel: Record<DataSource, { text: string; dotClass: string; badgeClass: string }> = {
-    loading: {
-      text: '데이터 로딩 중...',
-      dotClass: 'bg-gray-400 animate-pulse',
-      badgeClass: 'bg-gray-100 text-gray-500',
-    },
-    sheets: {
-      text: 'Google Sheets 연결됨',
-      dotClass: 'bg-green-500',
-      badgeClass: 'bg-green-50 text-green-600',
-    },
-    sample: {
-      text: '샘플 데이터',
-      dotClass: 'bg-amber-400',
-      badgeClass: 'bg-amber-50 text-amber-600',
-    },
-    error: {
-      text: '오류 — 샘플 데이터',
-      dotClass: 'bg-red-400',
-      badgeClass: 'bg-red-50 text-red-500',
-    },
+    loading: { text: '로딩 중...', dotClass: 'bg-gray-400 animate-pulse', badgeClass: 'bg-gray-100 text-gray-500' },
+    sheets:  { text: 'Google Sheets 연결됨', dotClass: 'bg-green-500', badgeClass: 'bg-green-50 text-green-600' },
+    sample:  { text: '샘플 데이터', dotClass: 'bg-amber-400', badgeClass: 'bg-amber-50 text-amber-600' },
+    error:   { text: '오류 — 샘플 데이터', dotClass: 'bg-red-400', badgeClass: 'bg-red-50 text-red-500' },
   };
 
   const { text: sourceText, dotClass, badgeClass } = sourceLabel[dataSource];
@@ -69,39 +53,49 @@ export default function DashboardPage() {
     <div className="flex min-h-screen bg-[#F5F7FA]">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="flex-1 pl-16">
-        <div className="p-6 max-w-screen-2xl">
+      {/* sm+: offset by sidebar; mobile: full width with bottom padding for tab bar */}
+      <main className="flex-1 sm:pl-16 pb-20 sm:pb-0">
+        <div className="p-4 sm:p-6 max-w-screen-2xl mx-auto">
+
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h1 className="text-xl font-bold text-gray-800">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-800">
                 {activeTab === 'dashboard' ? '업무 대시보드' : '업무 캘린더'}
               </h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                 {activeTab === 'dashboard' ? '업무 현황 분석' : '날짜별 업무 현황'}
               </p>
             </div>
-            <span className={`text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5 ${badgeClass}`}>
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5 ${badgeClass}`}>
               <span className={`w-1.5 h-1.5 rounded-full inline-block ${dotClass}`} />
-              {sourceText} ({tasks.length}건)
+              <span className="hidden sm:inline">{sourceText} </span>
+              ({tasks.length}건)
             </span>
           </div>
 
           {activeTab === 'dashboard' ? (
             <>
               <SummaryCards tasks={tasks} />
-              <div className="grid grid-cols-3 gap-4 mt-4" style={{ minHeight: 320 }}>
-                <div className="col-span-2"><WeeklyStackedChart tasks={tasks} /></div>
-                <div className="col-span-1"><CategoryDonutChart tasks={tasks} /></div>
+
+              {/* Charts row 1 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4" style={{ minHeight: 300 }}>
+                <div className="sm:col-span-2"><WeeklyStackedChart tasks={tasks} /></div>
+                <div className="sm:col-span-1"><CategoryDonutChart tasks={tasks} /></div>
               </div>
-              <div className="grid grid-cols-3 gap-4 mt-4" style={{ minHeight: 320 }}>
-                <div className="col-span-2"><MonthlyTrendChart tasks={tasks} /></div>
-                <div className="col-span-1"><SubCategoryTable tasks={tasks} /></div>
+
+              {/* Charts row 2 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4" style={{ minHeight: 300 }}>
+                <div className="sm:col-span-2"><MonthlyTrendChart tasks={tasks} /></div>
+                <div className="sm:col-span-1"><SubCategoryTable tasks={tasks} /></div>
               </div>
-              <div className="mt-4"><RecentTasksList tasks={tasks} /></div>
+
+              <div className="mt-3 sm:mt-4">
+                <RecentTasksList tasks={tasks} />
+              </div>
             </>
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-50 p-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-50 p-4 sm:p-6">
               <CalendarView tasks={tasks} />
             </div>
           )}
