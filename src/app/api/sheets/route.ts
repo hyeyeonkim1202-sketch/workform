@@ -88,15 +88,16 @@ function parseCSV(csv: string): Task[] {
   // Parse header to find column positions dynamically
   const header = splitCSVLine(lines[0]).map(c => c.trim().replace(/\r/g, ''));
 
-  const dateIdx    = header.findIndex(h => h === '날짜');
-  const mainCatIdx = header.findIndex(h => h === '상위항목');        // col 10
-  const subCatIdx  = header.findIndex(h => h === '하위항목');        // col 12 (exact, not 하위항목_가공)
-  const detailIdx  = header.findIndex(h => h === '업무내용');        // col 5
+  const dateIdx       = header.findIndex(h => h === '날짜');
+  // Main category: 재정비 전(1월) → 상위항목(col 10), 재정비 후 → 대분류(col 1)
+  const largeCatIdx   = header.findIndex(h => h === '대분류');
+  const upperCatIdx   = header.findIndex(h => h === '상위항목');
+  // Sub category: 재정비 전 → 하위항목(col 12), 재정비 후 → 중분류(col 2)
+  const midCatIdx     = header.findIndex(h => h === '중분류');
+  const subCatIdx     = header.findIndex(h => h === '하위항목');
+  const detailIdx     = header.findIndex(h => h === '업무내용');
 
-  // Fallbacks if headers not matched
   const dIdx  = dateIdx    >= 0 ? dateIdx    : 0;
-  const mIdx  = mainCatIdx >= 0 ? mainCatIdx : 1;
-  const sIdx  = subCatIdx  >= 0 ? subCatIdx  : 2;
   const deIdx = detailIdx  >= 0 ? detailIdx  : 5;
 
   const tasks: Task[] = [];
@@ -108,11 +109,20 @@ function parseCSV(csv: string): Task[] {
     const date = normalizeDate(cols[dIdx] ?? '');
     if (!date) continue;
 
-    const mainCategory = (cols[mIdx] ?? '') as MainCategory;
-    if (!mainCategory) continue;
+    // Use 대분류 if filled, fall back to 상위항목 (old structure)
+    const mainCategory = (
+      (largeCatIdx >= 0 ? cols[largeCatIdx] : '') ||
+      (upperCatIdx >= 0 ? cols[upperCatIdx] : '')
+    ).trim() as MainCategory;
+    if (!mainCategory || mainCategory === '미선택') continue;
 
-    const subCategory = cols[sIdx] ?? '';
-    const detail      = cols[deIdx] ?? '';
+    // Use 중분류 if filled, fall back to 하위항목 (old structure)
+    const subCategory = (
+      (midCatIdx >= 0 ? cols[midCatIdx] : '') ||
+      (subCatIdx >= 0 ? cols[subCatIdx] : '')
+    ).trim();
+
+    const detail = cols[deIdx] ?? '';
 
     tasks.push({ date, mainCategory, subCategory, detail });
   }
