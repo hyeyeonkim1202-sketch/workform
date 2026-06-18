@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Task } from '@/types';
-import { CATEGORY_COLORS } from '@/lib/dataUtils';
+import { getCategoryColor } from '@/lib/dataUtils';
 
 interface Props {
   tasks: Task[];
@@ -140,7 +140,7 @@ export default function CalendarView({ tasks }: Props) {
                       <span
                         key={cat}
                         className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: isSelected ? '#ffffff99' : CATEGORY_COLORS[cat as keyof typeof CATEGORY_COLORS] }}
+                        style={{ backgroundColor: isSelected ? '#ffffff99' : getCategoryColor(cat) }}
                       />
                     ))}
                   </div>
@@ -169,8 +169,8 @@ export default function CalendarView({ tasks }: Props) {
                   <span
                     className="text-[10px] px-1.5 py-0.5 rounded-md font-medium shrink-0"
                     style={{
-                      backgroundColor: `${CATEGORY_COLORS[t.mainCategory as keyof typeof CATEGORY_COLORS]}18`,
-                      color: CATEGORY_COLORS[t.mainCategory as keyof typeof CATEGORY_COLORS],
+                      backgroundColor: `${getCategoryColor(t.mainCategory)}18`,
+                      color: getCategoryColor(t.mainCategory),
                     }}
                   >
                     {t.mainCategory}
