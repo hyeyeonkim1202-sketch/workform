@@ -3,7 +3,7 @@
 import { ListChecks, TrendingUp, BarChart2, Star } from 'lucide-react';
 import { Task } from '@/types';
 import {
-  filterByDateRange,
+  filterByDateRange, getLatestDate,
   getWeekRangeForDate, getMonthRangeForDate, getCategoryStats,
 } from '@/lib/dataUtils';
 
@@ -32,10 +32,9 @@ function Card({ title, value, unit, subText, icon, iconBg, iconColor }: CardProp
 }
 
 export default function SummaryCards({ tasks }: { tasks: Task[] }) {
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const [weekStart, weekEnd] = getWeekRangeForDate(todayStr);
-  const [monthStart, monthEnd] = getMonthRangeForDate(todayStr);
+  const latestDate = getLatestDate(tasks);
+  const [weekStart, weekEnd] = latestDate ? getWeekRangeForDate(latestDate) : ['', ''];
+  const [monthStart, monthEnd] = latestDate ? getMonthRangeForDate(latestDate) : ['', ''];
 
   const weekTasks  = filterByDateRange(tasks, weekStart, weekEnd);
   const monthTasks = filterByDateRange(tasks, monthStart, monthEnd);

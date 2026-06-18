@@ -1,12 +1,18 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Task } from '@/types';
 import { getCategoryColor } from '@/lib/dataUtils';
 
 interface Props {
   tasks: Task[];
+}
+
+function parseDateLocal(dateStr: string): Date | null {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
 }
 
 function fmtKey(d: Date): string {
@@ -18,6 +24,15 @@ const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 export default function CalendarView({ tasks }: Props) {
   const [viewYear, setViewYear] = useState<number>(() => new Date().getFullYear());
   const [viewMonth, setViewMonth] = useState<number>(() => new Date().getMonth());
+
+  useEffect(() => {
+    if (tasks.length === 0) return;
+    const latest = [...tasks].map(t => t.date).sort().at(-1);
+    if (!latest) return;
+    const d = parseDateLocal(latest);
+    if (d) { setViewYear(d.getFullYear()); setViewMonth(d.getMonth()); }
+  }, [tasks]);
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Build a map: dateStr -> Task[]
