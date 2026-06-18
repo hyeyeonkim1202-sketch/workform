@@ -1,63 +1,110 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { Task } from '@/types';
+import { allTasks } from '@/lib/sampleData';
+import Sidebar, { ActiveTab } from '@/components/Sidebar';
+import SummaryCards from '@/components/SummaryCards';
+import WeeklyStackedChart from '@/components/WeeklyStackedChart';
+import CategoryDonutChart from '@/components/CategoryDonutChart';
+import MonthlyTrendChart from '@/components/MonthlyTrendChart';
+import SubCategoryTable from '@/components/SubCategoryTable';
+import RecentTasksList from '@/components/RecentTasksList';
+import CalendarView from '@/components/CalendarView';
+
+type DataSource = 'loading' | 'sheets' | 'sample' | 'error';
+
+export default function DashboardPage() {
+  const [tasks, setTasks] = useState<Task[]>(allTasks);
+  const [dataSource, setDataSource] = useState<DataSource>('loading');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/sheets');
+        if (!res.ok) throw new Error('Network error');
+        const json = (await res.json()) as { tasks: Task[]; source: string };
+        if (json.source === 'sheets' && json.tasks.length > 0) {
+          setTasks(json.tasks);
+          setDataSource('sheets');
+        } else {
+          setTasks(allTasks);
+          setDataSource('sample');
+        }
+      } catch {
+        setTasks(allTasks);
+        setDataSource('error');
+      }
+    }
+    fetchData();
+  }, []);
+
+  const sourceLabel: Record<DataSource, { text: string; dotClass: string; badgeClass: string }> = {
+    loading: {
+      text: '데이터 로딩 중...',
+      dotClass: 'bg-gray-400 animate-pulse',
+      badgeClass: 'bg-gray-100 text-gray-500',
+    },
+    sheets: {
+      text: 'Google Sheets 연결됨',
+      dotClass: 'bg-green-500',
+      badgeClass: 'bg-green-50 text-green-600',
+    },
+    sample: {
+      text: '샘플 데이터',
+      dotClass: 'bg-amber-400',
+      badgeClass: 'bg-amber-50 text-amber-600',
+    },
+    error: {
+      text: '오류 — 샘플 데이터',
+      dotClass: 'bg-red-400',
+      badgeClass: 'bg-red-50 text-red-500',
+    },
+  };
+
+  const { text: sourceText, dotClass, badgeClass } = sourceLabel[dataSource];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+    <div className="flex min-h-screen bg-[#F5F7FA]">
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <main className="flex-1 pl-16">
+        <div className="p-6 max-w-screen-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">
+                {activeTab === 'dashboard' ? '업무 대시보드' : '업무 캘린더'}
+              </h1>
+              <p className="text-sm text-gray-400 mt-0.5">
+                {activeTab === 'dashboard' ? '업무 현황 분석' : '날짜별 업무 현황'}
+              </p>
+            </div>
+            <span className={`text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5 ${badgeClass}`}>
+              <span className={`w-1.5 h-1.5 rounded-full inline-block ${dotClass}`} />
+              {sourceText} ({tasks.length}건)
+            </span>
+          </div>
+
+          {activeTab === 'dashboard' ? (
+            <>
+              <SummaryCards tasks={tasks} />
+              <div className="grid grid-cols-3 gap-4 mt-4" style={{ minHeight: 320 }}>
+                <div className="col-span-2"><WeeklyStackedChart tasks={tasks} /></div>
+                <div className="col-span-1"><CategoryDonutChart tasks={tasks} /></div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mt-4" style={{ minHeight: 320 }}>
+                <div className="col-span-2"><MonthlyTrendChart tasks={tasks} /></div>
+                <div className="col-span-1"><SubCategoryTable tasks={tasks} /></div>
+              </div>
+              <div className="mt-4"><RecentTasksList tasks={tasks} /></div>
+            </>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-50 p-6">
+              <CalendarView tasks={tasks} />
+            </div>
+          )}
         </div>
       </main>
     </div>
