@@ -77,8 +77,9 @@ export function getMonthlyData(tasks: Task[]): Record<string, string | number>[]
   const monthMap: Record<string, Record<string, number>> = {};
 
   for (const task of tasks) {
-    const d = new Date(task.date);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const match = task.date.match(/^(\d{4})-(\d{2})/);
+    if (!match) continue;
+    const key = `${match[1]}-${match[2]}`;
     if (!monthMap[key]) monthMap[key] = {};
     monthMap[key][task.mainCategory] = (monthMap[key][task.mainCategory] ?? 0) + 1;
   }

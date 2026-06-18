@@ -79,15 +79,15 @@ export default function DashboardPage() {
               <SummaryCards tasks={tasks} />
 
               {/* Charts row 1 */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4" style={{ minHeight: 300 }}>
-                <div className="sm:col-span-2"><WeeklyStackedChart tasks={tasks} /></div>
-                <div className="sm:col-span-1"><CategoryDonutChart tasks={tasks} /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4">
+                <div className="sm:col-span-2 h-72 sm:h-80"><WeeklyStackedChart tasks={tasks} /></div>
+                <div className="sm:col-span-1 h-72 sm:h-80"><CategoryDonutChart tasks={tasks} /></div>
               </div>
 
               {/* Charts row 2 */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4" style={{ minHeight: 300 }}>
-                <div className="sm:col-span-2"><MonthlyTrendChart tasks={tasks} /></div>
-                <div className="sm:col-span-1"><SubCategoryTable tasks={tasks} /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4">
+                <div className="sm:col-span-2 h-72 sm:h-80"><MonthlyTrendChart tasks={tasks} /></div>
+                <div className="sm:col-span-1 h-72 sm:h-80"><SubCategoryTable tasks={tasks} /></div>
               </div>
 
               <div className="mt-3 sm:mt-4">
